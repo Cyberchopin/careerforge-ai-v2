@@ -13,6 +13,13 @@ import {
 type View = "workspace" | "opportunities" | "evidence" | "decision-lab" | "reports";
 type Toast = { title: string; detail: string } | null;
 type StressResult = ReturnType<typeof stressTestAnswer> | null;
+type GeminiAudit = {
+  verdict: string;
+  verifiedStrengths: Array<{ claim: string; evidenceIds: number[] }>;
+  criticalGap: string;
+  nextAction: string;
+  interviewChallenge: string;
+};
 
 const opportunities = [
   { id: 1, role: "AI/ML Engineering Intern", company: "Applied Intelligence Lab", location: "San Francisco, CA", fit: 82, status: "Target" },
@@ -70,6 +77,9 @@ export default function CareerForge() {
   const [selectedReviewer, setSelectedReviewer] = useState<Analysis["reviewers"][number]["id"]>("engineer");
   const [challengeAnswer, setChallengeAnswer] = useState("");
   const [stressResult, setStressResult] = useState<StressResult>(null);
+  const [geminiAudit, setGeminiAudit] = useState<GeminiAudit | null>(null);
+  const [geminiProvenance, setGeminiProvenance] = useState<{ requestId: string; model: string; evidenceDigest: string } | null>(null);
+  const [geminiStatus, setGeminiStatus] = useState<"idle" | "loading" | "error">("idle");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -206,6 +216,31 @@ export default function CareerForge() {
       return;
     }
     setStressResult(stressTestAnswer(challengeAnswer));
+  };
+
+  const runGeminiAudit = async () => {
+    setGeminiStatus("loading");
+    setGeminiAudit(null);
+    setGeminiProvenance(null);
+    try {
+      const response = await fetch("/api/gemini-audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetRole: targetTitle,
+          evidence: analysis.evidence.map(({ title, excerpt, skills }) => ({ title, excerpt, skills })),
+          gaps: analysis.gaps.map(({ skill, severity }) => ({ skill, severity })),
+        }),
+      });
+      const payload = await response.json() as { audit?: GeminiAudit; provenance?: { requestId: string; model: string; evidenceDigest: string }; error?: string };
+      if (!response.ok || !payload.audit || !payload.provenance) throw new Error(payload.error || "Audit unavailable");
+      setGeminiAudit(payload.audit);
+      setGeminiProvenance(payload.provenance);
+      setGeminiStatus("idle");
+    } catch (error) {
+      setGeminiStatus("error");
+      setToast({ title: "Gemini audit unavailable", detail: error instanceof Error ? error.message : "Try again shortly." });
+    }
   };
 
   return (
@@ -442,6 +477,41 @@ export default function CareerForge() {
               <button className="plan-button" disabled={!selectedActions.length || riskyActions > 0} onClick={() => setToast({ title: "Action plan locked", detail: `${selectedActions.length} truth-preserving steps prioritized by impact per hour.` })}>Commit this action plan</button>
             </aside>
           </div>
+
+          <section className="gemini-audit">
+            <div className="panel-heading">
+              <div><p className="section-title">Gemini evidence auditor</p><h2>A second opinion that cannot invent a first.</h2></div>
+              <span>Google Gemini 3.5 · constrained JSON</span>
+            </div>
+            <div className="gemini-audit-grid">
+              <div className="gemini-audit-intro">
+                <p>CareerForge sends structured evidence excerpts—not the original uploaded file—to Gemini. Every strength must cite a supplied evidence ID; missing skills remain visible gaps.</p>
+                <button onClick={runGeminiAudit} disabled={geminiStatus === "loading"}>
+                  <Icon name="spark" />{geminiStatus === "loading" ? "Auditing evidence…" : "Run Gemini audit"}
+                </button>
+                <small>Server logs store a request ID and SHA-256 evidence digest, never resume content.</small>
+              </div>
+              <div className="gemini-audit-result" aria-live="polite">
+                {!geminiAudit && geminiStatus !== "loading" && <p className="empty-audit">No model verdict yet. The deterministic analysis above remains fully usable.</p>}
+                {geminiStatus === "loading" && <p className="empty-audit">Gemini is checking claim provenance and contradiction risk…</p>}
+                {geminiAudit && (
+                  <>
+                    <p className="kicker">Independent verdict</p>
+                    <h3>{geminiAudit.verdict}</h3>
+                    <div className="audit-facts">
+                      {geminiAudit.verifiedStrengths.slice(0, 3).map((strength) => (
+                        <p key={`${strength.claim}-${strength.evidenceIds.join("-")}`}><strong>Verified</strong>{strength.claim}<small>Evidence {strength.evidenceIds.join(", ")}</small></p>
+                      ))}
+                      <p><strong>Critical gap</strong>{geminiAudit.criticalGap}</p>
+                      <p><strong>Truthful next move</strong>{geminiAudit.nextAction}</p>
+                      <p><strong>Interview challenge</strong>{geminiAudit.interviewChallenge}</p>
+                    </div>
+                    {geminiProvenance && <div className="audit-provenance">{geminiProvenance.model} · {geminiProvenance.requestId.slice(0, 8)} · SHA {geminiProvenance.evidenceDigest.slice(0, 12)}</div>}
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
 
           <div className="reviewer-section">
             <div className="panel-heading"><div><p className="section-title">Recruiter Digital Twin</p><h2>Four reviewers. Four different failure modes.</h2></div><span>Role-specific simulation</span></div>

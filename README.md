@@ -26,6 +26,9 @@ while unsupported requirements remain visible as gaps.
   credibility risk before choosing the next portfolio or resume action.
 - **Recruiter Digital Twin** — review the same application through ATS,
   recruiter, engineering-manager, and skeptical-interviewer lenses.
+- **Gemini evidence auditor** — ask Gemini 3.5 Flash for a constrained second
+  opinion. The model sees only structured evidence excerpts, must cite
+  supplied evidence IDs, and cannot convert a gap into a resume claim.
 - **Adversarial answer lab** — pressure-test interview answers for ownership,
   architecture, trade-offs, verification, and failure awareness.
 - **No-fabrication guardrail** — missing skills are never silently inserted
@@ -57,21 +60,28 @@ npm run build
 ## Architecture
 
 ```text
-Resume / job description
+ Resume / job description
           │
           ▼
  deterministic extraction ──► normalized skill taxonomy
           │
           ├──► evidence ledger ──► grounded resume bullets
           ├──► coverage model  ──► match + ATS diagnostics
-          └──► missing skills  ──► gap plan + interview prep
+          ├──► missing skills  ──► gap plan + interview prep
+          └──► structured evidence only
+                         │
+                         ▼
+               Gemini 3.5 evidence audit
+                         │
+                         ▼
+        cited strengths + honest gaps + next action
 ```
 
-The current release runs its analysis locally and deterministically. That makes
-the demo fast, private, auditable, and usable without an API key. The analysis
-boundary is intentionally isolated in `lib/analyzer.ts`, so an embedding model,
-LLM reranker, database, or job-data provider can be introduced without
-rewriting the product UI.
+The core analysis runs locally and deterministically, so the product stays
+fast, inspectable, and usable without an API key. An optional server-side
+Gemini audit adds qualitative review without becoming the source of truth.
+Cloud Run logs only the model, request ID, evidence count, and SHA-256 digest;
+they do not log resume content.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system boundaries,
 scoring rules, trade-offs, and the production roadmap.
@@ -81,6 +91,8 @@ scoring rules, trade-offs, and the production roadmap.
 - React 19 + TypeScript
 - Next.js-compatible Vinext runtime
 - Vite + Cloudflare Workers deployment
+- Gemini API (`gemini-3.5-flash`) with structured JSON output
+- Google Cloud Run + Secret Manager production path
 - PDF.js resume extraction
 - ESLint and GitHub Actions
 
@@ -97,9 +109,46 @@ docs/ARCHITECTURE.md    product architecture and production roadmap
 ## Privacy and limitations
 
 This version processes resume text in the browser and stores drafts in
-`localStorage`. It does not send candidate data to a model provider. The score
-is an explainable product heuristic, not a promise that an employer’s ATS will
-produce the same result.
+`localStorage`. If the user explicitly clicks **Run Gemini audit**, the app
+sends derived evidence excerpts and gaps—not the original uploaded file—to the Gemini
+API. The score is an explainable product heuristic, not a promise that an
+employer’s ATS will produce the same result.
+
+## Google Cloud deployment (cost-bounded)
+
+Create a new Google Cloud project with billing and a small spend cap. Store one
+Gemini API key in Secret Manager as `careerforge-gemini-key`, then run:
+
+```bash
+export GOOGLE_CLOUD_PROJECT="your-project-id"
+export GOOGLE_CLOUD_REGION="us-central1"
+bash infra/gcp/deploy.sh
+```
+
+The script deploys one **public** Cloud Run service with request-based billing,
+zero minimum instances, and one maximum instance. The public route avoids the
+private-audience token failure mode. Verify deployment at:
+
+```text
+GET /api/healthz
+```
+
+The response reports whether Gemini is configured but never returns the key.
+The API also enforces a small request-size limit, five audits per caller per ten
+minutes, a short evidence-digest cache, and strict validation of Gemini's cited
+evidence IDs. Set a daily Gemini API quota in Google Cloud before sharing the
+public link; Cloud Run's one-instance limit alone does not cap model spend.
+See [docs/XPRIZE_EVIDENCE.md](docs/XPRIZE_EVIDENCE.md) for proof and disclosure
+requirements.
+
+## Build with Gemini XPRIZE disclosure
+
+CareerForge AI v2 and its deterministic evidence engine were created during
+the competition submission period. The XPRIZE upgrade adds the Gemini evidence
+auditor, Cloud Run production path, privacy-preserving invocation receipts, and
+business-validation workflow. Any generic framework and AI-assistant use must
+be disclosed in the final submission. Do not report users, revenue, or expenses
+that cannot be supported by real records.
 
 ## 中文简介
 
