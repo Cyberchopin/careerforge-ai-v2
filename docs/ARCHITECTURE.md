@@ -31,10 +31,31 @@ The MVP is browser-first:
 - PDF.js extracts uploaded PDF text in the browser.
 - `localStorage` persists the last resume, role, and report version.
 - External proof links are candidate-controlled and persisted locally.
-- No resume content leaves the browser.
+- Resume files and full resume text stay in the browser. If the user explicitly
+  invokes a Gemini feature, the server receives only bounded evidence excerpts,
+  gaps, or aggregate launch metrics required for that request.
 
 This architecture keeps the public demo private, reproducible, and inexpensive
 while maintaining a clean seam for production services.
+
+The server logs request IDs, model versions, counts, and SHA-256 digests. It
+does not log resume excerpts, feedback text, or API keys.
+
+## 2.1 AI-native operations
+
+CareerForge uses Gemini in two distinct roles:
+
+1. **Evidence Auditor** reviews candidate evidence but cannot create the source
+   of truth. Every positive claim must cite a supplied evidence ID.
+2. **Launch Operator** reviews only aggregate business metrics and anonymized
+   feedback, chooses one falsifiable 48-hour experiment, and cites the metric
+   or feedback IDs that justified the decision.
+
+The Launch Operator returns both an input digest and a decision digest. This
+creates a privacy-preserving operating receipt: judges can verify that a live
+model made a business decision without publishing candidate content or user
+feedback. It does not invent users, revenue, conversion, testimonials, or
+expenses; zero remains a valid and visible value.
 
 ## 3. Scoring model
 
@@ -140,6 +161,8 @@ shared infrastructure
 - **Evidence before generation:** provenance is a data model, not a disclaimer.
 - **Progressive enhancement:** the product remains useful if an AI provider is
   unavailable.
-- **Local-first demo:** real resumes can be tested without an external API key.
+- **Local-first core:** real resumes can be analyzed without an external API
+  key; explicit Gemini actions send only the bounded derived data disclosed in
+  the interface.
 - **Accessible interaction:** keyboard focus, reduced-motion support, and
   responsive layouts are part of the design system.

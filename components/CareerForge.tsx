@@ -10,7 +10,7 @@ import {
   type EvidenceItem,
 } from "@/lib/analyzer";
 
-type View = "workspace" | "opportunities" | "evidence" | "decision-lab" | "reports";
+type View = "workspace" | "opportunities" | "evidence" | "decision-lab" | "operator" | "reports";
 type Toast = { title: string; detail: string } | null;
 type StressResult = ReturnType<typeof stressTestAnswer> | null;
 type GeminiAudit = {
@@ -19,6 +19,13 @@ type GeminiAudit = {
   criticalGap: string;
   nextAction: string;
   interviewChallenge: string;
+};
+type OperatorDecision = {
+  decision: string;
+  rationale: string;
+  sourceIds: string[];
+  experiment: { hypothesis: string; action: string; successMetric: string; stopCondition: string };
+  risk: string;
 };
 
 const opportunities = [
@@ -80,6 +87,11 @@ export default function CareerForge() {
   const [geminiAudit, setGeminiAudit] = useState<GeminiAudit | null>(null);
   const [geminiProvenance, setGeminiProvenance] = useState<{ requestId: string; model: string; evidenceDigest: string } | null>(null);
   const [geminiStatus, setGeminiStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [operatorMetrics, setOperatorMetrics] = useState({ users: 0, audits: 0, exports: 0, returnIntent: 0, revenue: 0, expenses: 0, marketing: 0 });
+  const [operatorFeedback, setOperatorFeedback] = useState("");
+  const [operatorDecision, setOperatorDecision] = useState<OperatorDecision | null>(null);
+  const [operatorReceipt, setOperatorReceipt] = useState<{ requestId: string; model: string; inputDigest: string; decisionDigest: string } | null>(null);
+  const [operatorStatus, setOperatorStatus] = useState<"idle" | "loading" | "error">("idle");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -127,6 +139,7 @@ export default function CareerForge() {
   const projectedMatch = Math.min(98, analysis.match + projectedImpact);
   const riskyActions = selectedSimulation.filter((action) => action.credibility === "Risky").length;
   const activeReviewer = analysis.reviewers.find((reviewer) => reviewer.id === selectedReviewer) || analysis.reviewers[0];
+  const hasOperatorEvidence = Object.values(operatorMetrics).some((value) => value > 0) || operatorFeedback.trim().length > 0;
 
   const runAnalysis = () => {
     setIsAnalyzing(true);
@@ -243,6 +256,40 @@ export default function CareerForge() {
     }
   };
 
+  const runLaunchOperator = async () => {
+    setOperatorStatus("loading");
+    setOperatorDecision(null);
+    setOperatorReceipt(null);
+    try {
+      const response = await fetch("/api/launch-operator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          objective: "Choose the highest-leverage truthful validation experiment for CareerForge in the next 48 hours.",
+          constraints: "No fabricated traction. No paid acquisition above the recorded marketing spend. Protect candidate privacy.",
+          metrics: [
+            { label: "Unique external users", value: operatorMetrics.users, unit: "people", evidence: "Anonymized session ledger" },
+            { label: "Completed Gemini audits", value: operatorMetrics.audits, unit: "audits", evidence: "Privacy-preserving request receipts" },
+            { label: "Reports exported", value: operatorMetrics.exports, unit: "exports", evidence: "Aggregate export count" },
+            { label: "Would use again", value: operatorMetrics.returnIntent, unit: "people", evidence: "Consented post-test answer" },
+            { label: "Revenue", value: operatorMetrics.revenue, unit: "USD", evidence: "Payment ledger" },
+            { label: "Operating expenses", value: operatorMetrics.expenses, unit: "USD", evidence: "Cloud bill and receipts" },
+            { label: "Marketing spend", value: operatorMetrics.marketing, unit: "USD", evidence: "Acquisition ledger" },
+          ],
+          feedback: operatorFeedback.trim() ? [operatorFeedback.trim()] : [],
+        }),
+      });
+      const payload = await response.json() as { decision?: OperatorDecision; receipt?: { requestId: string; model: string; inputDigest: string; decisionDigest: string }; error?: string };
+      if (!response.ok || !payload.decision || !payload.receipt) throw new Error(payload.error || "Operator unavailable");
+      setOperatorDecision(payload.decision);
+      setOperatorReceipt(payload.receipt);
+      setOperatorStatus("idle");
+    } catch (error) {
+      setOperatorStatus("error");
+      setToast({ title: "Launch Operator unavailable", detail: error instanceof Error ? error.message : "Try again shortly." });
+    }
+  };
+
   return (
     <main className="app-shell">
       <header className="global-header">
@@ -254,6 +301,7 @@ export default function CareerForge() {
             ["opportunities", "opportunities"],
             ["evidence", "proof graph"],
             ["decision-lab", "decision lab"],
+            ["operator", "launch operator"],
             ["reports", "reports"],
           ] as [View, string][]).map(([item, label]) => (
             <button
@@ -542,6 +590,72 @@ export default function CareerForge() {
                 )}
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {view === "operator" && (
+        <section className="page-view operator-view">
+          <div className="page-intro">
+            <p className="kicker">AI-native business operations</p>
+            <h1>Let evidence choose the next experiment.</h1>
+            <p>Enter only real aggregate totals and anonymized feedback. Gemini selects one measurable 48-hour operating decision and signs it with a privacy-preserving receipt.</p>
+          </div>
+
+          <div className="operator-ledger">
+            <section className="operator-inputs">
+              <div className="panel-heading">
+                <div><p className="section-title">Honest launch ledger</p><h2>Real numbers, including zero.</h2></div>
+                <span>No PII · no invented traction</span>
+              </div>
+              <div className="operator-metric-grid">
+                {([
+                  ["users", "Unique external users", "people"],
+                  ["audits", "Completed Gemini audits", "audits"],
+                  ["exports", "Reports exported", "exports"],
+                  ["returnIntent", "Would use again", "people"],
+                  ["revenue", "Revenue", "USD"],
+                  ["expenses", "Operating expenses", "USD"],
+                  ["marketing", "Marketing spend", "USD"],
+                ] as [keyof typeof operatorMetrics, string, string][]).map(([key, label, unit]) => (
+                  <label key={key}>
+                    <span>{label}</span>
+                    <div><input type="number" min="0" step={unit === "USD" ? "0.01" : "1"} value={operatorMetrics[key]} onChange={(event) => setOperatorMetrics((current) => ({ ...current, [key]: Math.max(0, Number(event.target.value) || 0) }))} /><small>{unit}</small></div>
+                  </label>
+                ))}
+              </div>
+              <label className="operator-feedback">
+                <span>Top repeated user insight</span>
+                <small>Summarize without names, emails, employers, schools, or diagnosis details.</small>
+                <textarea value={operatorFeedback} onChange={(event) => setOperatorFeedback(event.target.value.slice(0, 280))} placeholder="Example format: Testers understood the evidence ledger but wanted a faster way to compare two target roles." />
+              </label>
+              <button className="operator-run" onClick={runLaunchOperator} disabled={operatorStatus === "loading" || !hasOperatorEvidence}>
+                <Icon name="spark" />{operatorStatus === "loading" ? "Choosing one experiment…" : "Ask Gemini to operate the next move"}
+              </button>
+              {!hasOperatorEvidence && <p className="operator-empty-note">Add at least one real non-zero total or one anonymized feedback insight. Zeros remain visible; the system never manufactures traction.</p>}
+            </section>
+
+            <aside className="operator-decision" aria-live="polite">
+              <p className="section-title">Signed operating decision</p>
+              {!operatorDecision && operatorStatus !== "loading" && <div className="operator-placeholder"><span>Awaiting evidence</span><p>The deterministic product remains usable. Gemini is invoked only when a real launch ledger is ready.</p></div>}
+              {operatorStatus === "loading" && <div className="operator-placeholder"><span>Gemini 3.5 is evaluating</span><p>Comparing learning velocity, evidence quality, cost, and falsifiability.</p></div>}
+              {operatorDecision && (
+                <>
+                  <p className="kicker">Decision</p>
+                  <h2>{operatorDecision.decision}</h2>
+                  <p className="operator-rationale">{operatorDecision.rationale}</p>
+                  <div className="operator-plan">
+                    <p><strong>Hypothesis</strong>{operatorDecision.experiment.hypothesis}</p>
+                    <p><strong>48-hour action</strong>{operatorDecision.experiment.action}</p>
+                    <p><strong>Success metric</strong>{operatorDecision.experiment.successMetric}</p>
+                    <p><strong>Stop condition</strong>{operatorDecision.experiment.stopCondition}</p>
+                    <p><strong>Primary risk</strong>{operatorDecision.risk}</p>
+                  </div>
+                  <div className="operator-citations">Sources {operatorDecision.sourceIds.join(", ")}</div>
+                  {operatorReceipt && <div className="operator-receipt"><span>{operatorReceipt.model}</span><span>REQ {operatorReceipt.requestId.slice(0, 8)}</span><span>IN {operatorReceipt.inputDigest.slice(0, 10)}</span><span>OUT {operatorReceipt.decisionDigest.slice(0, 10)}</span></div>}
+                </>
+              )}
+            </aside>
           </div>
         </section>
       )}

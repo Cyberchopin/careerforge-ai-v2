@@ -38,7 +38,23 @@ is not.
 5. Run the Gemini evidence audit.
 6. Point to cited evidence IDs, the critical gap, the request ID, and evidence
    digest.
-7. Show the Cloud Run request log and the business ledger.
+7. Open Launch Operator and enter the honest business ledger, including zeros.
+8. Run one live operating decision and show its cited source IDs, measurable
+   success metric, stop condition, input digest, and decision digest.
+9. Show the matching privacy-preserving Cloud Run logs.
+
+## AI-native operations proof
+
+The product feature and the business operator are intentionally separate.
+
+- **Evidence Auditor:** improves the candidate experience while remaining
+  constrained by candidate evidence.
+- **Launch Operator:** participates in operating the business by selecting the
+  next validation experiment from real aggregate metrics and anonymized user
+  feedback.
+
+Before submission, save one complete operator receipt and document whether the
+experiment was executed. Do not describe a proposed experiment as completed.
 
 ## Kill switch
 
