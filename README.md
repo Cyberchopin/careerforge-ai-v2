@@ -29,6 +29,9 @@ while unsupported requirements remain visible as gaps.
 - **Gemini evidence auditor** — ask Gemini 3.5 Flash for a constrained second
   opinion. The model sees only structured evidence excerpts, must cite
   supplied evidence IDs, and cannot convert a gap into a resume claim.
+- **Gemini Launch Operator** — turn real aggregate launch metrics and
+  anonymized feedback into one falsifiable 48-hour business experiment. The
+  decision cites its inputs and produces hashed input/output receipts.
 - **Adversarial answer lab** — pressure-test interview answers for ownership,
   architecture, trade-offs, verification, and failure awareness.
 - **No-fabrication guardrail** — missing skills are never silently inserted
@@ -75,13 +78,18 @@ npm run build
                          │
                          ▼
         cited strengths + honest gaps + next action
+
+ aggregate launch ledger ──► Gemini Launch Operator
+          │                         │
+          └── real metrics only     └── cited experiment + signed receipt
 ```
 
 The core analysis runs locally and deterministically, so the product stays
-fast, inspectable, and usable without an API key. An optional server-side
-Gemini audit adds qualitative review without becoming the source of truth.
-Cloud Run logs only the model, request ID, evidence count, and SHA-256 digest;
-they do not log resume content.
+fast, inspectable, and usable without an API key. Two explicit server-side
+Gemini actions add a constrained evidence audit and a business operating
+decision without becoming the source of truth. Cloud Run logs only the model,
+request ID, counts, and SHA-256 digests; it does not log resume excerpts,
+feedback text, or API keys.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system boundaries,
 scoring rules, trade-offs, and the production roadmap.
@@ -110,9 +118,11 @@ docs/ARCHITECTURE.md    product architecture and production roadmap
 
 This version processes resume text in the browser and stores drafts in
 `localStorage`. If the user explicitly clicks **Run Gemini audit**, the app
-sends derived evidence excerpts and gaps—not the original uploaded file—to the Gemini
-API. The score is an explainable product heuristic, not a promise that an
-employer’s ATS will produce the same result.
+sends derived evidence excerpts and gaps—not the original uploaded file—to the
+Gemini API. If the user runs **Launch Operator**, it sends only the aggregate
+metrics and anonymized feedback they entered. The score is an explainable
+product heuristic, not a promise that an employer’s ATS will produce the same
+result.
 
 ## Google Cloud deployment (cost-bounded)
 
@@ -134,10 +144,10 @@ GET /api/healthz
 ```
 
 The response reports whether Gemini is configured but never returns the key.
-The API also enforces a small request-size limit, five audits per caller per ten
-minutes, a short evidence-digest cache, and strict validation of Gemini's cited
-evidence IDs. Set a daily Gemini API quota in Google Cloud before sharing the
-public link; Cloud Run's one-instance limit alone does not cap model spend.
+The APIs also enforce small request-size limits, per-caller rate limits,
+short digest caches, and strict validation of Gemini's cited source IDs. Set a
+daily Gemini API quota in Google Cloud before sharing the public link; Cloud
+Run's one-instance limit alone does not cap model spend.
 See [docs/XPRIZE_EVIDENCE.md](docs/XPRIZE_EVIDENCE.md) for proof and disclosure
 requirements.
 
@@ -146,7 +156,8 @@ requirements.
 CareerForge AI v2 and its deterministic evidence engine were created during
 the competition submission period. The XPRIZE upgrade adds the Gemini evidence
 auditor, Cloud Run production path, privacy-preserving invocation receipts, and
-business-validation workflow. Any generic framework and AI-assistant use must
+an AI Launch Operator that turns real business evidence into a falsifiable
+experiment. Any generic framework and AI-assistant use must
 be disclosed in the final submission. Do not report users, revenue, or expenses
 that cannot be supported by real records.
 
