@@ -485,7 +485,7 @@ export default function CareerForge() {
             </div>
             <div className="gemini-audit-grid">
               <div className="gemini-audit-intro">
-                <p>CareerForge sends only the structured evidence ledger—not the uploaded file—to Gemini. Every strength must cite a supplied evidence ID; missing skills remain visible gaps.</p>
+                <p>CareerForge sends structured evidence excerpts—not the original uploaded file—to Gemini. Every strength must cite a supplied evidence ID; missing skills remain visible gaps.</p>
                 <button onClick={runGeminiAudit} disabled={geminiStatus === "loading"}>
                   <Icon name="spark" />{geminiStatus === "loading" ? "Auditing evidence…" : "Run Gemini audit"}
                 </button>

@@ -27,7 +27,7 @@ while unsupported requirements remain visible as gaps.
 - **Recruiter Digital Twin** — review the same application through ATS,
   recruiter, engineering-manager, and skeptical-interviewer lenses.
 - **Gemini evidence auditor** — ask Gemini 3.5 Flash for a constrained second
-  opinion. The model sees only the structured evidence ledger, must cite
+  opinion. The model sees only structured evidence excerpts, must cite
   supplied evidence IDs, and cannot convert a gap into a resume claim.
 - **Adversarial answer lab** — pressure-test interview answers for ownership,
   architecture, trade-offs, verification, and failure awareness.
@@ -110,7 +110,7 @@ docs/ARCHITECTURE.md    product architecture and production roadmap
 
 This version processes resume text in the browser and stores drafts in
 `localStorage`. If the user explicitly clicks **Run Gemini audit**, the app
-sends the derived evidence ledger and gaps—not the uploaded file—to the Gemini
+sends derived evidence excerpts and gaps—not the original uploaded file—to the Gemini
 API. The score is an explainable product heuristic, not a promise that an
 employer’s ATS will produce the same result.
 
@@ -134,6 +134,10 @@ GET /api/healthz
 ```
 
 The response reports whether Gemini is configured but never returns the key.
+The API also enforces a small request-size limit, five audits per caller per ten
+minutes, a short evidence-digest cache, and strict validation of Gemini's cited
+evidence IDs. Set a daily Gemini API quota in Google Cloud before sharing the
+public link; Cloud Run's one-instance limit alone does not cap model spend.
 See [docs/XPRIZE_EVIDENCE.md](docs/XPRIZE_EVIDENCE.md) for proof and disclosure
 requirements.
 
