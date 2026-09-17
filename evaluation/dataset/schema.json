@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerforge.ai/evaluation/resume-claims.schema.json",
+  "title": "CareerForge Controlled Resume Claims Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resume_id",
+    "role_family",
+    "synthetic",
+    "evidence_universe_complete",
+    "candidate_resume_text",
+    "evidence_packet",
+    "claims"
+  ],
+  "properties": {
+    "resume_id": {"type": "string", "pattern": "^R[0-9]{3}$"},
+    "role_family": {"type": "string"},
+    "synthetic": {"const": true},
+    "evidence_universe_complete": {"const": true},
+    "candidate_resume_text": {"type": "string", "minLength": 1},
+    "evidence_packet": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_id", "kind", "text"],
+        "properties": {
+          "evidence_id": {"type": "string"},
+          "kind": {
+            "enum": [
+              "project_record",
+              "benchmark_record",
+              "ownership_record",
+              "verification_record",
+              "deployment_record"
+            ]
+          },
+          "text": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "text",
+          "ground_truth_label",
+          "supporting_evidence_ids",
+          "mutation_type",
+          "construction_note"
+        ],
+        "properties": {
+          "claim_id": {"type": "string"},
+          "text": {"type": "string", "minLength": 1},
+          "ground_truth_label": {
+            "enum": ["supported", "partial", "fabricated"]
+          },
+          "supporting_evidence_ids": {
+            "type": "array",
+            "items": {"type": "string"},
+            "uniqueItems": true
+          },
+          "mutation_type": {
+            "enum": [
+              "exact_evidence",
+              "exact_ownership",
+              "metric_inflation",
+              "scope_inflation",
+              "invented_technology",
+              "invented_leadership"
+            ]
+          },
+          "construction_note": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
