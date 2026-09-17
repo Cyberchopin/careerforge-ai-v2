@@ -93,6 +93,8 @@ feedback text, or API keys.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system boundaries,
 scoring rules, trade-offs, and the production roadmap.
+See [docs/CITATION_ENFORCEMENT.md](docs/CITATION_ENFORCEMENT.md) for the
+independent citation gate, runtime schema, tests, and remaining limitations.
 
 ## Tech stack
 
