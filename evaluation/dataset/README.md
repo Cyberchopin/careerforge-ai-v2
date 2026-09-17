@@ -1,6 +1,6 @@
 # Controlled resume-claims dataset
 
-This directory is step 1 of the CareerForge evaluation. It contains only synthetic records, so the ground truth is controlled rather than inferred from real resumes.
+This directory is step 1 of the CareerForge evaluation. It contains only synthetic records, so the ground truth is controlled rather than inferred from real resumes. The test data are committed for reproducibility; "sealed" means a documented no-tuning rule, not access control or secrecy from people who read the repository.
 
 ## Dataset unit
 
@@ -15,7 +15,7 @@ Each record represents one fictional resume and contains:
 
 The 24 resumes span frontend, data analysis, ML, backend, UX research, DevOps, product engineering, and research-assistant profiles. Names and facts are fictional. Templates are deliberately balanced so later results cannot be attributed to class imbalance.
 
-This step names the three classes only to encode controlled ground truth. The formal operational labeling protocol and blind-scoring procedure belong to step 2 and have not yet been defined.
+The operational definitions and blind-scoring procedure are frozen in [../LABELING_PROTOCOL.md](../LABELING_PROTOCOL.md). Independent outside review has not occurred.
 
 ## Fixed split
 
@@ -52,4 +52,4 @@ This first dataset is synthetic and template-balanced. It enables exact ground t
 
 The held-out set contains only six resumes and 36 claims. Claim-level observations are clustered within resumes, so eventual confidence intervals must resample or model at the resume level; treating all 36 claims as independent would overstate precision. Any final comparison must show the wide uncertainty and avoid sweeping population claims.
 
-The original 144 claims were **not** designed to isolate citation-enforcement and schema-validation branches. Separate development-only probes are documented in [CHALLENGE_CASES.md](CHALLENGE_CASES.md). They do not alter the sealed split and cannot substitute for actual ablation results.
+The original 144 claims were **not** designed to isolate citation-enforcement and schema-validation branches. Separate development-only probes are documented in [CHALLENGE_CASES.md](CHALLENGE_CASES.md). They do not alter the sealed split and cannot substitute for actual ablation results. No test-set metric has been reported.

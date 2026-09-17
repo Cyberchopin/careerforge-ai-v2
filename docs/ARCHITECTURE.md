@@ -7,7 +7,7 @@ CareerForge separates candidate facts from generated recommendations:
 1. **Input layer** accepts resume text, PDF, TXT, or Markdown plus a target job
    description.
 2. **Extraction layer** maps text to a normalized skill taxonomy.
-3. **Evidence layer** creates immutable references to resume sections.
+3. **Evidence layer** creates local references to resume sections.
 4. **Scoring layer** evaluates overlap, resume structure, evidence density, and
    quantified impact.
 5. **Recommendation layer** generates gaps, grounded bullets, and interview
@@ -19,8 +19,9 @@ CareerForge separates candidate facts from generated recommendations:
 
 The main invariant is:
 
-> Generated claims may reframe verified evidence, but may not introduce an
-> unsupported skill or outcome.
+> Generated recommendations may reframe extracted resume evidence, but must
+> not silently introduce a role skill absent from the input. This is not a
+> factual verification of the original resume.
 
 ## 2. Current runtime
 
@@ -46,15 +47,17 @@ does not log resume excerpts, feedback text, or API keys.
 CareerForge uses Gemini in two distinct roles:
 
 1. **Evidence Auditor** reviews candidate evidence but cannot create the source
-   of truth. Every positive claim must cite a supplied evidence ID.
+   of truth. Every positive strength must cite a supplied evidence ID and pass
+   a second-pass check by the same Gemini model. This check is not blind or
+   independent human adjudication.
 2. **Launch Operator** reviews only aggregate business metrics and anonymized
    feedback, chooses one falsifiable 48-hour experiment, and cites the metric
    or feedback IDs that justified the decision.
 
 The Launch Operator returns both an input digest and a decision digest. This
-creates a privacy-preserving operating receipt: judges can verify that a live
-model made a business decision without publishing candidate content or user
-feedback. It does not invent users, revenue, conversion, testimonials, or
+creates a privacy-preserving consistency receipt: a digest can be recomputed
+from the same input and output, but it is not a signature or independent proof
+that a live model made a particular decision. It does not invent users, revenue, conversion, testimonials, or
 expenses; zero remains a valid and visible value.
 
 ## 3. Scoring model
@@ -72,7 +75,8 @@ The ATS score combines:
 
 Scores are capped below 100 because the system cannot observe an employer’s
 actual ranking model, recruiter preferences, or applicant pool. The UI labels
-the result as guidance rather than a hiring prediction.
+the result as guidance rather than a hiring prediction. Neither ATS-style
+scores nor simulated reviewer outputs have external validity measurements.
 
 ## 4. No-fabrication mechanism
 
@@ -83,13 +87,16 @@ skills and job skills.
 - Skills in the difference become explicit gaps and recommended next actions.
 - Every tailored bullet carries its source section.
 
-This produces a visible provenance trail from input text to recommendation.
+This produces a visible provenance trail from input text to recommendation,
+not proof that the candidate's input is truthful. Candidate-supplied external
+links in ProofGraph are displayed but not automatically verified or used as a
+separate claim-verdict engine.
 
 ## 5. Decision intelligence
 
 The counterfactual engine assigns each action:
 
-- estimated match impact;
+- heuristic modeled match impact;
 - time cost;
 - credibility classification;
 - action type (`Build`, `Verify`, or `Rewrite`).
@@ -98,7 +105,7 @@ The interface recomputes the selected plan in real time and blocks commitment
 when a keyword-only action would introduce unsupported claims.
 
 The Reviewer Digital Twin intentionally avoids pretending to reproduce a real
-employer's proprietary model. Instead, four deterministic reviewers expose
+employer's proprietary model. Instead, four deterministic simulated lenses expose
 different and explainable failure modes. The adversarial answer checker tests
 for ownership, architecture, trade-offs, verification, and failure awareness.
 
@@ -116,8 +123,10 @@ The next production stages fit behind the existing analyzer boundary:
 ### Stage B — semantic intelligence
 
 - embeddings for skill and responsibility similarity;
-- structured LLM extraction with JSON-schema validation;
-- a second-pass entailment check for every generated claim;
+- broader structured LLM extraction with runtime schema validation beyond the
+  bounded Gemini audit;
+- groundedness checks covering every generated recommendation, not only the
+  audit's positive strengths;
 - prompt and model version tracking.
 
 ### Stage C — market intelligence

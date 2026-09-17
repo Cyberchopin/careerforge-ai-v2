@@ -1,4 +1,4 @@
-# Independent reviewer dependency — decide before labeling protocol
+# Independent reviewer dependency
 
 Status as of **2026-09-17**: **no reviewer has been recruited or confirmed**. These are candidate channels, not named people or commitments. The project owner must make contact; CareerForge output and experiment predictions must not be shown to reviewers.
 
@@ -12,7 +12,7 @@ Status as of **2026-09-17**: **no reviewer has been recruited or confirmed**. Th
 - **2026-09-18 17:00 PDT:** owner selects and contacts at least one candidate in each channel. Record names privately, contact dates, conflicts, and response status; do not commit personal contact details.
 - **2026-09-21 17:00 PDT:** owner confirms two independent reviewers or declares the dependency unmet. This is the confirmation deadline, not a claim that anyone has accepted.
 - **2026-09-25 17:00 PDT:** if both accept, reserve a review slot and agree on a blinded packet handoff date. Do not provide sealed-test model predictions.
-- If fewer than two qualified reviewers confirm by the deadline, **do not describe labels as independently reviewed**. The owner can still use controlled synthetic ground truth for engineering tests, but external-label reliability and “independent human review” claims remain unavailable. Re-plan before writing the Step 2 protocol.
+- If fewer than two qualified reviewers confirm by the deadline, **do not describe labels as independently reviewed**. The owner can still use controlled synthetic ground truth for engineering tests, but external-label reliability and “independent human review” claims remain unavailable. The written protocol does not substitute for human review.
 
 Suggested invitation: “I am evaluating a résumé-claim verification prototype. Would you independently review a small, synthetic evidence-and-claim packet without seeing the product's predictions? I need a support judgment plus a short rationale per item. Please tell me by September 21 at 5 p.m. Pacific whether you can participate; conflicts of interest or lack of time are completely fine.”
 

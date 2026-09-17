@@ -18,7 +18,7 @@ test("runtime schema rejects malformed output instead of passing it through", ()
   assert.throws(() => validateAudit({ ...audit, verifiedStrengths: [{ claim: "x", evidenceIds: [1, 1] }] }, 1));
 });
 
-test("an independently supported claim survives", async () => {
+test("a claim supported by the second-pass check survives", async () => {
   const result = await enforceCitationSupport(audit, evidence, async (_claim, cited) => {
     assert.equal(cited[0].excerpt, evidence[0].excerpt);
     return { support: "supported", reason: "The cited sentence states the claim." };

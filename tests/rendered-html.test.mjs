@@ -36,7 +36,8 @@ test("renders development preview metadata", async () => {
 test("renders the Gemini evidence auditor", async () => {
   const source = await readFile(new URL("../components/CareerForge.tsx", import.meta.url), "utf8");
   assert.match(source, /Gemini evidence auditor/i);
-  assert.match(source, /cannot invent a first/i);
+  assert.match(source, /second pass by the same model/i);
+  assert.match(source, /Model-based verdict/i);
   assert.match(source, /\/api\/gemini-audit/);
 });
 
