@@ -65,7 +65,7 @@ export async function enforceCitationSupport(
       ...audit,
       verifiedStrengths: accepted,
       verdict: rejectedCount
-        ? `${rejectedCount} proposed strength(s) withheld: independent citation check did not confirm full support.`
+        ? `${rejectedCount} proposed strength(s) withheld: second-pass model check did not confirm full support.`
         : audit.verdict,
     },
     rejectedCount,

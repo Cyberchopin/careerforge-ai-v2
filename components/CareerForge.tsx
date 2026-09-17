@@ -219,7 +219,7 @@ export default function CareerForge() {
     setProofLinks((current) => ({ ...current, [id]: trimmed }));
     setToast({
       title: trimmed ? "Artifact connected" : "Artifact removed",
-      detail: trimmed ? "The proof is now attached to this claim on this device." : "The claim returned to resume-only verification.",
+      detail: trimmed ? "Link saved on this device; its content has not been checked." : "Link removed; the resume excerpt remains available.",
     });
   };
 
@@ -366,8 +366,8 @@ export default function CareerForge() {
             <Meter value={analysis.match} />
             <div className="scale"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
             <div className="score-block">
-              <div><p className="section-title">ATS score</p><strong>{analysis.ats}<small>/100</small></strong></div>
-              <p>{analysis.matchedSkills.length} role signals matched across {analysis.evidence.length} verified evidence sources.</p>
+              <div><p className="section-title">ATS-style heuristic</p><strong>{analysis.ats}<small>/100</small></strong></div>
+              <p>{analysis.matchedSkills.length} role signals matched across {analysis.evidence.length} resume excerpts; neither score nor sources are externally verified.</p>
               <button onClick={() => setView("reports")}>Open report <Icon name="arrow" /></button>
             </div>
             <div className="ledger">
@@ -407,7 +407,7 @@ export default function CareerForge() {
           </aside>
           <div className="verification-strip">
             <div><span className="status-icon"><Icon name="check" /></span><p>Source coverage<strong>{analysis.coverage}%</strong></p></div>
-            <div><span className="status-icon"><Icon name="check" /></span><p>Artifacts connected<strong>{Object.values(proofLinks).filter(Boolean).length}/{analysis.evidence.length}</strong></p></div>
+            <div><span className="status-icon"><Icon name="check" /></span><p>Links supplied (unchecked)<strong>{Object.values(proofLinks).filter(Boolean).length}/{analysis.evidence.length}</strong></p></div>
             <div><span className="status-icon"><Icon name="history" /></span><p>Resume version<strong>v{version}.0</strong></p></div>
             <div className="privacy">LOCAL-FIRST ANALYSIS · YOUR FILES STAY IN THIS BROWSER</div>
           </div>
@@ -433,11 +433,11 @@ export default function CareerForge() {
 
       {view === "evidence" && (
         <section className="page-view evidence-view">
-          <div className="page-intro"><p className="kicker">ProofGraph / claim provenance</p><h1>Every claim needs inspectable proof.</h1><p>Connect repositories, deployments, benchmarks, or design artifacts. Resume text is evidence; an external artifact makes it independently inspectable.</p></div>
+          <div className="page-intro"><p className="kicker">ProofGraph / claim provenance</p><h1>Inspect the source behind each claim.</h1><p>Attach repositories, deployments, benchmarks, or design artifacts. These candidate-supplied links are shown for inspection, not automatically validated as proof.</p></div>
           <div className="proof-summary">
-            <div><strong>{analysis.proofGraph.filter((node) => node.status === "Verified").length}</strong><span>structurally verified</span></div>
-            <div><strong>{Object.values(proofLinks).filter(Boolean).length}</strong><span>artifacts connected</span></div>
-            <div><strong>{Math.round(analysis.proofGraph.reduce((sum, node) => sum + node.confidence, 0) / Math.max(1, analysis.proofGraph.length))}%</strong><span>mean confidence</span></div>
+            <div><strong>{analysis.proofGraph.filter((node) => node.status === "Verified").length}</strong><span>high-detail excerpts</span></div>
+            <div><strong>{Object.values(proofLinks).filter(Boolean).length}</strong><span>links supplied (unchecked)</span></div>
+            <div><strong>{Math.round(analysis.proofGraph.reduce((sum, node) => sum + node.confidence, 0) / Math.max(1, analysis.proofGraph.length))}%</strong><span>mean heuristic completeness</span></div>
           </div>
           <div className="proof-board">
             {analysis.proofGraph.map((node, index) => {
@@ -449,14 +449,14 @@ export default function CareerForge() {
                   <div className="proof-head">
                     <span className="evidence-number">{String(index + 1).padStart(2, "0")}</span>
                     <div><p className="kicker">{item.signal}</p><h2>{node.title}</h2></div>
-                    <span className={`proof-status status-${linked ? "verified" : node.status.toLowerCase()}`}>{linked ? "Artifact linked" : node.status}</span>
+                    <span className={`proof-status status-${linked ? "verified" : node.status.toLowerCase()}`}>{linked ? "Link supplied" : node.status === "Verified" ? "High detail" : node.status === "Partial" ? "Some detail" : "Needs detail"}</span>
                   </div>
                   <p className="proof-claim">{node.claim}</p>
-                  <div className="proof-confidence"><span>Claim confidence</span><strong>{Math.min(99, node.confidence + (linked ? 12 : 0))}%</strong></div>
-                  <Meter value={Math.min(99, node.confidence + (linked ? 12 : 0))} />
+                  <div className="proof-confidence"><span>Heuristic detail score</span><strong>{node.confidence}%</strong></div>
+                  <Meter value={node.confidence} />
                   <div className="proof-dimensions">
                     {node.dimensions.map((dimension) => <span key={dimension.label} className={dimension.covered ? "covered" : ""}><Icon name={dimension.covered ? "check" : "arrow"} />{dimension.label}</span>)}
-                    <span className={linked ? "covered" : ""}><Icon name={linked ? "check" : "arrow"} />External artifact</span>
+                    <span className={linked ? "covered" : ""}><Icon name={linked ? "check" : "arrow"} />Candidate-supplied link (unchecked)</span>
                   </div>
                   <label className="proof-link">
                     <span>Repository, deployment, benchmark, or case study URL</span>
@@ -476,7 +476,7 @@ export default function CareerForge() {
                     </div>
                   </label>
                   <button className="approve-proof" onClick={() => setSelectedEvidence((current) => selected ? current.filter((id) => id !== node.id) : [...current, node.id])}>
-                    <span className="select-mark"><Icon name="check" /></span>{selected ? "Approved for generation" : "Approve for generation"}
+                    <span className="select-mark"><Icon name="check" /></span>{selected ? "Marked for review" : "Mark for review"}
                   </button>
                 </article>
               );
@@ -487,7 +487,7 @@ export default function CareerForge() {
 
       {view === "decision-lab" && (
         <section className="page-view decision-view">
-          <div className="page-intro"><p className="kicker">Career decision intelligence</p><h1>Test the move before you spend the time.</h1><p>Model improvement paths, then stress-test your story through four independent reviewer lenses.</p></div>
+          <div className="page-intro"><p className="kicker">Career decision intelligence</p><h1>Test the move before you spend the time.</h1><p>Compare heuristic improvement paths, then stress-test your story through four simulated reviewer lenses.</p></div>
           <div className="simulator-shell">
             <section className="simulator-panel">
               <div className="panel-heading"><div><p className="section-title">Counterfactual simulator</p><h2>What should you do next?</h2></div><span>{selectedActions.length} selected</span></div>
@@ -528,12 +528,12 @@ export default function CareerForge() {
 
           <section className="gemini-audit">
             <div className="panel-heading">
-              <div><p className="section-title">Gemini evidence auditor</p><h2>A second opinion that cannot invent a first.</h2></div>
+              <div><p className="section-title">Gemini evidence auditor</p><h2>Model suggestions checked against cited excerpts.</h2></div>
               <span>Google Gemini 3.5 · constrained JSON</span>
             </div>
             <div className="gemini-audit-grid">
               <div className="gemini-audit-intro">
-                <p>CareerForge sends structured evidence excerpts—not the original uploaded file—to Gemini. Every strength must cite a supplied evidence ID; missing skills remain visible gaps.</p>
+                <p>CareerForge sends structured evidence excerpts—not the original uploaded file—to Gemini. A second pass by the same model checks each cited strength. This is not human verification; missing skills remain visible gaps.</p>
                 <button onClick={runGeminiAudit} disabled={geminiStatus === "loading"}>
                   <Icon name="spark" />{geminiStatus === "loading" ? "Auditing evidence…" : "Run Gemini audit"}
                 </button>
@@ -544,11 +544,11 @@ export default function CareerForge() {
                 {geminiStatus === "loading" && <p className="empty-audit">Gemini is checking claim provenance and contradiction risk…</p>}
                 {geminiAudit && (
                   <>
-                    <p className="kicker">Independent verdict</p>
+                    <p className="kicker">Model-based verdict</p>
                     <h3>{geminiAudit.verdict}</h3>
                     <div className="audit-facts">
                       {geminiAudit.verifiedStrengths.slice(0, 3).map((strength) => (
-                        <p key={`${strength.claim}-${strength.evidenceIds.join("-")}`}><strong>Verified</strong>{strength.claim}<small>Evidence {strength.evidenceIds.join(", ")}</small></p>
+                        <p key={`${strength.claim}-${strength.evidenceIds.join("-")}`}><strong>Second-pass checked</strong>{strength.claim}<small>Evidence {strength.evidenceIds.join(", ")}</small></p>
                       ))}
                       <p><strong>Critical gap</strong>{geminiAudit.criticalGap}</p>
                       <p><strong>Truthful next move</strong>{geminiAudit.nextAction}</p>
@@ -562,7 +562,7 @@ export default function CareerForge() {
           </section>
 
           <div className="reviewer-section">
-            <div className="panel-heading"><div><p className="section-title">Recruiter Digital Twin</p><h2>Four reviewers. Four different failure modes.</h2></div><span>Role-specific simulation</span></div>
+            <div className="panel-heading"><div><p className="section-title">Recruiter Digital Twin</p><h2>Four simulated lenses. Four different failure modes.</h2></div><span>Role-specific simulation</span></div>
             <div className="reviewer-tabs">
               {analysis.reviewers.map((reviewer) => (
                 <button key={reviewer.id} className={selectedReviewer === reviewer.id ? "active" : ""} onClick={() => { setSelectedReviewer(reviewer.id); setStressResult(null); }}>
@@ -694,7 +694,7 @@ export default function CareerForge() {
             <div className="drawer-head"><div><p className="kicker">Analysis inputs</p><h2 id="analysis-title">Align evidence to a role</h2></div><button onClick={() => setDrawerOpen(false)}>×</button></div>
             <label><span>Resume evidence</span><small>Only information written here can appear in a generated claim.</small><textarea value={resume} onChange={(event) => setResume(event.target.value)} /></label>
             <label><span>Job description</span><small>Paste the complete role description for stronger signal extraction.</small><textarea value={job} onChange={(event) => setJob(event.target.value)} /></label>
-            <div className="drawer-note"><Icon name="check" /><p><strong>No-fabrication guardrail</strong><br />Missing skills become gaps, never invented experience.</p></div>
+            <div className="drawer-note"><Icon name="check" /><p><strong>No-fabrication scope</strong><br />Skills absent from the input remain gaps. Original resume claims are not fact-checked.</p></div>
             <button className="analyze-button" onClick={runAnalysis} disabled={isAnalyzing || resume.length < 40 || job.length < 40}>{isAnalyzing ? "Mapping evidence…" : "Run evidence analysis"}<Icon name="arrow" /></button>
           </aside>
         </div>

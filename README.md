@@ -3,9 +3,9 @@
 > Evidence-driven career intelligence for serious technical candidates.
 
 CareerForge turns a resume and job description into a traceable application
-strategy. It measures role alignment, identifies skill gaps, generates
-source-linked resume bullets, and prepares interview questions without
-inventing experience.
+strategy. It measures role alignment, identifies skill gaps, selects and
+reorders source-linked resume excerpts, and prepares interview questions
+without adding new outcomes.
 
 The product is deliberately different from a generic “AI resume writer”:
 every recommendation is attached to evidence already present in the resume,
@@ -16,29 +16,32 @@ while unsupported requirements remain visible as gaps.
 - **Resume ingestion** — paste text or import PDF, TXT, and Markdown resumes.
 - **Role intelligence** — analyze any job description against a normalized
   technical skill taxonomy.
-- **ATS diagnostics** — inspect keyword coverage, structure, evidence density,
-  and role alignment.
-- **Evidence ledger** — trace every generated bullet back to a resume project
+- **ATS-style heuristic diagnostics** — inspect keyword coverage, structure,
+  evidence density, and role alignment; not a prediction of employer ATS results.
+- **Evidence ledger** — trace every selected excerpt back to a resume project
   or experience.
-- **ProofGraph** — attach repositories, deployments, benchmarks, and case
-  studies to individual claims, then inspect confidence dimension by dimension.
-- **Counterfactual simulator** — compare potential match lift, time cost, and
-  credibility risk before choosing the next portfolio or resume action.
-- **Recruiter Digital Twin** — review the same application through ATS,
-  recruiter, engineering-manager, and skeptical-interviewer lenses.
+- **ProofGraph visualization** — attach candidate-supplied repositories,
+  deployments, benchmarks, and case studies to claims for inspection; links
+  are not automatically verified as proof.
+- **Counterfactual heuristic** — compare modeled match lift, time cost, and
+  credibility risk; these are not externally validated outcome estimates.
+- **Recruiter Digital Twin simulation** — inspect four deterministic,
+  designer-authored reviewer lenses, not real recruiter judgments.
 - **Gemini evidence auditor** — ask Gemini 3.5 Flash for a constrained second
-  opinion. The model sees only structured evidence excerpts, must cite
-  supplied evidence IDs, and cannot convert a gap into a resume claim.
+  opinion. The proposed strengths must cite supplied evidence IDs and pass a
+  second-pass check by the same model. This is model-based consistency checking,
+  not independent human verification.
 - **Gemini Launch Operator** — turn real aggregate launch metrics and
   anonymized feedback into one falsifiable 48-hour business experiment. The
   decision cites its inputs and produces hashed input/output receipts.
 - **Adversarial answer lab** — pressure-test interview answers for ownership,
   architecture, trade-offs, verification, and failure awareness.
-- **No-fabrication guardrail** — missing skills are never silently inserted
-  into the resume.
+- **No-fabrication scope** — role skills absent from the input remain gaps,
+  rather than being silently inserted as candidate experience. The system
+  cannot establish whether the original resume itself is truthful.
 - **Gap planning** — turn missing requirements into concrete portfolio or
   learning actions.
-- **Tailored reports** — generate role-specific bullets and evidence-backed
+- **Tailored reports** — prioritize role-relevant source excerpts and evidence-backed
   interview questions.
 - **Local persistence** — keep the working draft and analysis in the browser.
 - **Export** — download the current application brief as a text report.
@@ -94,7 +97,10 @@ feedback text, or API keys.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system boundaries,
 scoring rules, trade-offs, and the production roadmap.
 See [docs/CITATION_ENFORCEMENT.md](docs/CITATION_ENFORCEMENT.md) for the
-independent citation gate, runtime schema, tests, and remaining limitations.
+second-pass model-based citation gate, runtime schema, tests, and limitations.
+See [docs/CLAIM_IMPLEMENTATION_STATUS.md](docs/CLAIM_IMPLEMENTATION_STATUS.md)
+for claim-by-claim implementation and deployment status. The synthetic
+evaluation dataset and unscored protocols live under [evaluation/](evaluation/).
 
 ## Tech stack
 

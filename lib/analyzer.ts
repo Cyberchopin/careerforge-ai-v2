@@ -3,7 +3,7 @@ export type EvidenceItem = {
   title: string;
   source: string;
   signal: string;
-  strength: "Strong" | "Verified" | "Supporting";
+  strength: "Strong" | "Quantified" | "Supporting";
   skills: string[];
   excerpt: string;
 };
@@ -133,7 +133,7 @@ function buildEvidence(resume: string): EvidenceItem[] {
         title: title || `Evidence ${index + 1}`,
         source,
         signal: skills.slice(0, 2).join(" + ") || "Experience",
-        strength: skills.length >= 3 ? "Strong" as const : hasMetric ? "Verified" as const : "Supporting" as const,
+        strength: skills.length >= 3 ? "Strong" as const : hasMetric ? "Quantified" as const : "Supporting" as const,
         skills,
         excerpt: lines.slice(1).join(" ") || section,
       };
@@ -142,11 +142,9 @@ function buildEvidence(resume: string): EvidenceItem[] {
     .slice(0, 8);
 }
 
-function sentenceForEvidence(item: EvidenceItem, targetSkills: string[]) {
-  const aligned = item.skills.filter((skill) => targetSkills.includes(skill));
-  const original = item.excerpt.replace(/\s+/g, " ").replace(/[.。]$/, "");
-  if (!aligned.length) return original;
-  return `${original}, applying ${aligned.slice(0, 3).join(", ")} to role-relevant product delivery`;
+function sentenceForEvidence(item: EvidenceItem) {
+  // Reorder existing excerpts for the role; do not add an unrecorded outcome.
+  return item.excerpt.replace(/\s+/g, " ").replace(/[.。]$/, "");
 }
 
 function buildProofGraph(evidence: EvidenceItem[], jobSkills: string[]): ProofNode[] {
@@ -308,8 +306,11 @@ export function analyzeResume(resume: string, job: string): Analysis {
             : `Add a verifiable project artifact that demonstrates ${skill} in practice.`,
   }));
 
-  const tailoredBullets = evidence.slice(0, 5).map((item) => ({
-    text: sentenceForEvidence(item, jobSkills),
+  const tailoredBullets = [...evidence].sort((a, b) =>
+    b.skills.filter((skill) => jobSkills.includes(skill)).length -
+    a.skills.filter((skill) => jobSkills.includes(skill)).length,
+  ).slice(0, 5).map((item) => ({
+    text: sentenceForEvidence(item),
     source: item.source,
   }));
 

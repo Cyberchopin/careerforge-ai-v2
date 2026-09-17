@@ -152,7 +152,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 .signal { justify-self: start; padding: 4px 6px; border: 1px solid var(--rule); border-radius: 3px; background: rgba(255,255,255,.25); font: 8px/1 "Courier New", monospace; }
 .strength { display: flex; align-items: center; gap: 5px; font: 8px/1 "Courier New", monospace; }
 .strength i { width: 6px; height: 6px; border-radius: 50%; background: var(--wine); }
-.strength-verified i { background: var(--green); }
+.strength-quantified i { background: var(--green); }
 .strength-supporting i { background: var(--olive); }
 .evidence-row button { display: grid; place-items: center; background: transparent; cursor: pointer; }
 .evidence-row button svg { width: 15px; }

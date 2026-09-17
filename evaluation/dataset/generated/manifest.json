@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "seed": 20260916,
+  "split_unit": "resume_id",
+  "split_ratio": {
+    "development": 0.75,
+    "test": 0.25
+  },
+  "counts": {
+    "resumes": 24,
+    "claims": 144,
+    "development_resumes": 18,
+    "development_claims": 108,
+    "test_resumes": 6,
+    "test_claims": 36
+  },
+  "class_counts_per_resume": {
+    "supported": 2,
+    "partial": 2,
+    "fabricated": 2
+  },
+  "test_resume_ids": [
+    "resume-001",
+    "resume-002",
+    "resume-007",
+    "resume-008",
+    "resume-016",
+    "resume-017"
+  ],
+  "sha256": {
+    "all": "7f938a20627ebc7179f5ff5aab1260ead4c3844c2e4e295ed34f029113f55382",
+    "development": "564488a6bd940c89d57f667fd30920fdae71af777b501f6a731c543101c36c78",
+    "test": "06599d5450aad2cc37b2f3ea0ff0fa30f9806281153a3e6dbcf0e972e30f8913"
+  }
+}
