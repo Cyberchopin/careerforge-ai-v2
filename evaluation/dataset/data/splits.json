@@ -1,0 +1,115 @@
+{
+  "claim_counts": {
+    "dev": {
+      "fabricated": 16,
+      "partial": 16,
+      "supported": 16
+    },
+    "test": {
+      "fabricated": 16,
+      "partial": 16,
+      "supported": 16
+    },
+    "train": {
+      "fabricated": 48,
+      "partial": 48,
+      "supported": 48
+    }
+  },
+  "counts": {
+    "dev": 8,
+    "test": 8,
+    "train": 24
+  },
+  "dataset_name": "careerforge-controlled-claims-v1",
+  "dataset_sha256": "467fd6a670d0d69bbb070b956a7372bdc9c32c038e92cac92dfdcf38573ff573",
+  "dataset_version": 1,
+  "holdout_rule": "Use train/dev only while changing prompts, schemas, thresholds, validation, citation, or evidence logic. Open test only after the evaluation design is frozen.",
+  "ids": {
+    "dev": [
+      "R001",
+      "R008",
+      "R014",
+      "R017",
+      "R024",
+      "R030",
+      "R032",
+      "R038"
+    ],
+    "test": [
+      "R002",
+      "R009",
+      "R012",
+      "R020",
+      "R021",
+      "R029",
+      "R033",
+      "R039"
+    ],
+    "train": [
+      "R003",
+      "R004",
+      "R005",
+      "R006",
+      "R007",
+      "R010",
+      "R011",
+      "R013",
+      "R015",
+      "R016",
+      "R018",
+      "R019",
+      "R022",
+      "R023",
+      "R025",
+      "R026",
+      "R027",
+      "R028",
+      "R031",
+      "R034",
+      "R035",
+      "R036",
+      "R037",
+      "R040"
+    ]
+  },
+  "ratios": {
+    "dev": 0.2,
+    "test": 0.2,
+    "train": 0.6
+  },
+  "role_counts": {
+    "dev": {
+      "backend_engineering": 1,
+      "cloud_infrastructure": 1,
+      "computer_vision": 1,
+      "data_engineering": 1,
+      "frontend_engineering": 1,
+      "machine_learning": 1,
+      "research_engineering": 1,
+      "software_engineering": 1
+    },
+    "test": {
+      "backend_engineering": 1,
+      "cloud_infrastructure": 1,
+      "computer_vision": 1,
+      "data_engineering": 1,
+      "frontend_engineering": 1,
+      "machine_learning": 1,
+      "research_engineering": 1,
+      "software_engineering": 1
+    },
+    "train": {
+      "backend_engineering": 3,
+      "cloud_infrastructure": 3,
+      "computer_vision": 3,
+      "data_engineering": 3,
+      "frontend_engineering": 3,
+      "machine_learning": 3,
+      "research_engineering": 3,
+      "software_engineering": 3
+    }
+  },
+  "seed": 20260916,
+  "split_policy": "Stratified by role_family: each family has 5 resumes; fixed-seed shuffle then 3 train, 1 dev, 1 test."
+}
