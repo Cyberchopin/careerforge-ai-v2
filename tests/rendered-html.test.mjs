@@ -66,10 +66,15 @@ test("health endpoint reports Gemini configuration without exposing a key", asyn
 
 test("Gemini audit accepts only cited, structured output", async () => {
   const originalFetch = globalThis.fetch;
+  let geminiCalls = 0;
   process.env.GEMINI_API_KEY = "unit-test-key";
   globalThis.fetch = async (input, init) => {
     if (String(input).startsWith("https://generativelanguage.googleapis.com/")) {
       assert.equal(init.headers["x-goog-api-key"], "unit-test-key");
+      geminiCalls += 1;
+      if (geminiCalls === 2) {
+        return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify({ support: "supported", reason: "The source describes the built interface." }) }] } }] });
+      }
       return Response.json({
         candidates: [{ content: { parts: [{ text: JSON.stringify({
           verdict: "Credible evidence with one material gap.",
@@ -99,9 +104,11 @@ test("Gemini audit accepts only cited, structured output", async () => {
     const body = await response.json();
     assert.equal(response.status, 200);
     assert.deepEqual(body.audit.verifiedStrengths[0].evidenceIds, [1]);
+    assert.equal(geminiCalls, 2);
     assert.equal(body.provenance.evidenceCount, 1);
     assert.equal(body.provenance.cacheHit, false);
     assert.match(body.provenance.evidenceDigest, /^[a-f0-9]{64}$/);
+    assert.match(body.provenance.outputDigest, /^[a-f0-9]{64}$/);
   } finally {
     globalThis.fetch = originalFetch;
     delete process.env.GEMINI_API_KEY;

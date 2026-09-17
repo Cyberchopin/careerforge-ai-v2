@@ -194,7 +194,7 @@ function buildSimulations(gaps: Gap[], evidence: EvidenceItem[]): SimulationActi
     credibility: "Safe",
     kind: "Verify",
   }] : [];
-  return [
+  const actions: SimulationAction[] = [
     ...verification,
     {
       id: "rewrite-evidence",
@@ -217,7 +217,8 @@ function buildSimulations(gaps: Gap[], evidence: EvidenceItem[]): SimulationActi
       credibility: "Risky",
       kind: "Rewrite",
     },
-  ].sort((a, b) => (b.impact / b.hours) - (a.impact / a.hours));
+  ];
+  return actions.sort((a, b) => (b.impact / b.hours) - (a.impact / a.hours));
 }
 
 function buildReviewers(

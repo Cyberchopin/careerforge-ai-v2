@@ -18,7 +18,7 @@ gcloud run deploy careerforge-ai \
   --concurrency 20 \
   --min 0 \
   --max 1 \
-  --timeout 30s \
+  --timeout 90s \
   --set-secrets "GEMINI_API_KEY=${GEMINI_SECRET_NAME}:latest" \
   --set-env-vars "GEMINI_MODEL=gemini-3.5-flash"
 
