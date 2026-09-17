@@ -3,9 +3,9 @@
 > Evidence-driven career intelligence for serious technical candidates.
 
 CareerForge turns a resume and job description into a traceable application
-strategy. It measures role alignment, identifies skill gaps, generates
-source-linked resume bullets, and prepares interview questions without
-inventing experience.
+strategy. It measures role alignment, identifies skill gaps, selects and
+reorders source-linked resume excerpts, and prepares interview questions
+without adding new outcomes.
 
 The product is deliberately different from a generic “AI resume writer”:
 every recommendation is attached to evidence already present in the resume,
@@ -18,7 +18,7 @@ while unsupported requirements remain visible as gaps.
   technical skill taxonomy.
 - **ATS-style heuristic diagnostics** — inspect keyword coverage, structure,
   evidence density, and role alignment; not a prediction of employer ATS results.
-- **Evidence ledger** — trace every generated bullet back to a resume project
+- **Evidence ledger** — trace every selected excerpt back to a resume project
   or experience.
 - **ProofGraph visualization** — attach candidate-supplied repositories,
   deployments, benchmarks, and case studies to claims for inspection; links
@@ -41,7 +41,7 @@ while unsupported requirements remain visible as gaps.
   cannot establish whether the original resume itself is truthful.
 - **Gap planning** — turn missing requirements into concrete portfolio or
   learning actions.
-- **Tailored reports** — generate role-specific bullets and evidence-backed
+- **Tailored reports** — prioritize role-relevant source excerpts and evidence-backed
   interview questions.
 - **Local persistence** — keep the working draft and analysis in the browser.
 - **Export** — download the current application brief as a text report.

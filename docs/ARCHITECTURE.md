@@ -10,7 +10,7 @@ CareerForge separates candidate facts from generated recommendations:
 3. **Evidence layer** creates local references to resume sections.
 4. **Scoring layer** evaluates overlap, resume structure, evidence density, and
    quantified impact.
-5. **Recommendation layer** generates gaps, grounded bullets, and interview
+5. **Recommendation layer** identifies gaps, prioritizes recorded excerpts, and creates interview
    questions.
 6. **Decision layer** builds a claim proof graph, counterfactual action model,
    reviewer simulations, and adversarial answer checks.
